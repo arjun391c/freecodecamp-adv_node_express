@@ -1,9 +1,7 @@
 const passport = require("passport");
 const bcrypt = require("bcrypt");
-const auth = require("./auth.js");
 
 module.exports = function (app, db) {
-
   //ensure is authenticated before accesing page to profile
   function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
@@ -27,6 +25,19 @@ module.exports = function (app, db) {
     .route("/login")
     .post(
       passport.authenticate("local", { failureRedirect: "/" }),
+      (req, res) => {
+        res.redirect("/profile");
+      }
+    );
+
+  //Oauth using github
+  app.route("/auth/github")
+     .get(passport.authenticate("github"));
+
+  app
+    .route("/auth/github/callback")
+    .get(
+      passport.authenticate("github", { failureRedirect: "/" }),
       (req, res) => {
         res.redirect("/profile");
       }

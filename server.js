@@ -103,7 +103,7 @@ mongo.connect(process.env.DATABASE, { useUnifiedTopology: true }, (err, db) => {
       );
 
     app.route("/profile").get(ensureAuthenticated, (req, res) => {
-      res.render("profile");
+      res.render("profile",{ username: req.user.username });
     });
 
     app.listen(process.env.PORT || 3000, () => {

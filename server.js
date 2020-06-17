@@ -39,7 +39,8 @@ mongo.connect(process.env.DATABASE, { useUnifiedTopology: true }, (err, db) => {
     console.log('Database error: ' + err);
   } else {
     console.log('Successful database connection');
-
+    var db = db.db('users');
+  
     //serialization and app.listen
     passport.serializeUser((user, done) => {
       done(null, user._id);
@@ -68,9 +69,23 @@ mongo.connect(process.env.DATABASE, { useUnifiedTopology: true }, (err, db) => {
     
     app.route("/").get((req, res) => {
       //Change the response to render the Pug template
-      res.render("pug/index", {title: 'Hello', message: 'Please login'});
+      res.render("pug/index", {
+                                title: 'Hello', 
+                                message: 'Please login',
+                                showLogin: true
+                              });
      // res.send(`Pug template is not defined.`);
     });
+
+    app.route("/login").post(passport.authenticate('local', { failureRedirect: "/"}),
+      (req, res) => {
+        res.redirect("/");
+      }
+    )
+
+    app.route("/profile").get((req, res) => {
+      res.render("pug/profile")
+    })
     
     app.listen(process.env.PORT || 3000, () => {
       console.log("Listening on port " + process.env.PORT);

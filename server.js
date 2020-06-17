@@ -6,6 +6,7 @@ const fccTesting = require("./freeCodeCamp/fcctesting.js");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const bcrypt = require("bcrypt");
 const mongo = require("mongodb").MongoClient;
 //for user id
 const ObjectID = require("mongodb").ObjectID;
@@ -67,7 +68,7 @@ mongo.connect(process.env.DATABASE, { useUnifiedTopology: true }, (err, db) => {
           if (!user) {
             return done(null, false);
           }
-          if (password !== user.password) {
+          if (!bcrypt.compareSync(password, user.password)) {
             return done(null, false);
           }
           return done(null, user);
@@ -105,6 +106,7 @@ mongo.connect(process.env.DATABASE, { useUnifiedTopology: true }, (err, db) => {
 
     app.route("/register").post(
       (req, res, next) => {
+        var hashedPass = bcrypt.hashSync(req.body.password, 12) 
         db.collection("users").findOne(
           { username: req.body.username },
           (err, user) => {
@@ -116,7 +118,7 @@ mongo.connect(process.env.DATABASE, { useUnifiedTopology: true }, (err, db) => {
               db.collection("users").insertOne(
                 {
                   username: req.body.username,
-                  password: req.body.password,
+                  password: hashedPass,
                 },
                 (err, doc) => {
                   if (err) {
